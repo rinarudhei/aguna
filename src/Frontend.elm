@@ -13,6 +13,11 @@ type alias Model =
     FrontendModel
 
 
+type Page
+    = Home
+    | Login
+
+
 app =
     Lamdera.frontend
         { init = init
