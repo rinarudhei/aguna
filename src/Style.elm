@@ -21,6 +21,9 @@ customFontStyles =
             @font-face { font-family: 'Clash Display'; src: url('/fonts/ClashDisplay-Medium.woff2')     format('woff2'); font-weight: 500; font-style: normal; font-display: swap; }
             @font-face { font-family: 'Clash Display'; src: url('/fonts/ClashDisplay-Semibold.woff2')   format('woff2'); font-weight: 600; font-style: normal; font-display: swap; }
             @font-face { font-family: 'Clash Display'; src: url('/fonts/ClashDisplay-Bold.woff2')       format('woff2'); font-weight: 700; font-style: normal; font-display: swap; }
+
+
+            @font-face { font-family: 'Satoshi'; src: url('/fonts/Satoshi-Regular.woff2')    format('woff2'); font-weight: 400; font-style: normal; font-display: swap; }
         """ ]
 
 
