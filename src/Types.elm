@@ -1,7 +1,7 @@
 module Types exposing (..)
 
 import Browser exposing (UrlRequest)
-import Browser.Dom
+import Browser.Dom as Dom
 import Browser.Navigation exposing (Key)
 import Element exposing (Device)
 import Url exposing (Url)
@@ -28,7 +28,7 @@ type FrontendMsg
     = UrlClicked UrlRequest
     | UrlChanged Url
     | WindowResized Int Int
-    | GotWindowSize Browser.Dom.Viewport
+    | GotWindowSize Dom.Viewport
     | NoOpFrontendMsg
 
 

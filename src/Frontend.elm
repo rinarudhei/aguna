@@ -1,14 +1,14 @@
 module Frontend exposing (..)
 
 import Browser exposing (UrlRequest(..))
-import Browser.Dom
+import Browser.Dom as Dom
 import Browser.Events
 import Browser.Navigation as Nav
-import Element exposing (DeviceClass(..), Orientation(..), classifyDevice, column, row)
-import Html
-import Html.Attributes as Attr
+import Element exposing (Device, DeviceClass(..), Orientation(..), classifyDevice, column, el, image, paddingXY, px, row, text, width)
+import Element.Font as Font
 import Lamdera
 import Routes exposing (Route, match)
+import Style exposing (clashDisplay, lineHeight150)
 import Task
 import Types exposing (..)
 import Url
@@ -22,17 +22,17 @@ setNewPage : Maybe Route -> Model -> ( Model, Cmd FrontendMsg )
 setNewPage maybeRoute model =
     let
         cmd =
-            Task.perform GotWindowSize Browser.Dom.getViewport
+            Task.perform GotWindowSize Dom.getViewport
     in
     case maybeRoute of
         Just Routes.Home ->
-            ( { model | page = Home }, Cmd.none )
+            ( { model | page = Home }, cmd )
 
         Just Routes.Login ->
-            ( { model | page = Login }, Cmd.none )
+            ( { model | page = Login }, cmd )
 
         Nothing ->
-            ( { model | page = NotFound }, Cmd.none )
+            ( { model | page = NotFound }, cmd )
 
 
 update : FrontendMsg -> Model -> ( Model, Cmd FrontendMsg )
@@ -77,31 +77,49 @@ updateFromBackend msg model =
             ( model, Cmd.none )
 
 
-viewHeader : Html.Html msg
+viewHeader : Element.Element msg
 viewHeader =
-    Element.layout []
-        (column []
-            [ row []
-                []
-            , row
-                []
-                []
-            ]
-        )
+    column []
+        [ row []
+            [ text "Avion" ]
+        , row
+            []
+            []
+        ]
+
+
+deviceToString : Device -> String
+deviceToString device =
+    case device.class of
+        Phone ->
+            "Phone"
+
+        Tablet ->
+            "Tablet"
+
+        Desktop ->
+            "desktop"
+
+        BigDesktop ->
+            "big"
 
 
 view : Model -> Browser.Document FrontendMsg
 view model =
     { title = "Aguna - Jual Barang Berguna - Homepage"
     , body =
-        [ Html.div [ Attr.style "text-align" "center", Attr.style "padding-top" "40px" ]
-            [ Html.img [ Attr.src "https://lamdera.app/lamdera-logo-black.png", Attr.width 150 ] []
-            , Html.div
-                [ Attr.style "font-family" "sans-serif"
-                , Attr.style "padding-top" "40px"
+        [ Element.layout [ clashDisplay, lineHeight150 ]
+            (column []
+                [ viewHeader
+                , column [ Font.center, paddingXY 40 0 ]
+                    [ image [ width (px 150) ] { src = "https://lamdera.app/lamdera-logo-black.png", description = "lamdera logo" }
+                    , el
+                        [ paddingXY 40 0
+                        ]
+                        (text ("Mantap Mantap yuk " ++ deviceToString model.device))
+                    ]
                 ]
-                [ Html.text "Mantap Mantap yuk" ]
-            ]
+            )
         ]
     }
 
@@ -134,6 +152,6 @@ app =
         , onUrlChange = UrlChanged
         , update = update
         , updateFromBackend = updateFromBackend
-        , subscriptions = \m -> Sub.none
+        , subscriptions = sub
         , view = view
         }
