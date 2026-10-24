@@ -4,12 +4,12 @@ import Browser exposing (UrlRequest)
 import Browser.Dom as Dom
 import Browser.Navigation exposing (Key)
 import Element exposing (Device)
+import Pages.Home as Home
 import Url exposing (Url)
 
 
 type Page
-    = Home
-    | Login
+    = Home Home.Model
     | NotFound
 
 
@@ -30,6 +30,7 @@ type FrontendMsg
     | WindowResized Int Int
     | GotWindowSize Dom.Viewport
     | NoOpFrontendMsg
+    | HomeMsg Home.Msg
 
 
 type ToBackend

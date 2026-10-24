@@ -4,11 +4,18 @@ import Browser exposing (UrlRequest(..))
 import Browser.Dom as Dom
 import Browser.Events
 import Browser.Navigation as Nav
-import Element exposing (Device, DeviceClass(..), Orientation(..), classifyDevice, column, el, image, paddingXY, px, row, text, width)
-import Element.Font as Font
+import Element
+    exposing
+        ( Device
+        , DeviceClass(..)
+        , Orientation(..)
+        , classifyDevice
+        , text
+        )
+import Html exposing (Html)
 import Lamdera
+import Pages.Home as Home
 import Routes exposing (Route, match)
-import Style exposing (clashDisplay, lineHeight150)
 import Task
 import Types exposing (..)
 import Url
@@ -16,6 +23,16 @@ import Url
 
 type alias Model =
     FrontendModel
+
+
+processUpdatePage :
+    (pageModel -> Page)
+    -> (pageMsg -> FrontendMsg)
+    -> Model
+    -> ( pageModel, Cmd pageMsg )
+    -> ( Model, Cmd FrontendMsg )
+processUpdatePage createPage msgWrapper model ( pageModel, cmdPageMsg ) =
+    ( { model | page = createPage pageModel }, Cmd.map msgWrapper cmdPageMsg )
 
 
 setNewPage : Maybe Route -> Model -> ( Model, Cmd FrontendMsg )
@@ -26,19 +43,29 @@ setNewPage maybeRoute model =
     in
     case maybeRoute of
         Just Routes.Home ->
-            ( { model | page = Home }, cmd )
+            Home.init
+                |> processUpdatePage Home HomeMsg model
 
         Just Routes.Login ->
-            ( { model | page = Login }, cmd )
+            ( { model | page = NotFound }, cmd )
 
         Nothing ->
             ( { model | page = NotFound }, cmd )
 
 
+setDevice : Int -> Int -> Model -> ( Model, Cmd FrontendMsg )
+setDevice w h model =
+    ( { model | device = classifyDevice { width = w, height = h } }, Cmd.none )
+
+
 update : FrontendMsg -> Model -> ( Model, Cmd FrontendMsg )
 update msg model =
-    case msg of
-        UrlClicked urlRequest ->
+    case ( msg, model.page ) of
+        ( HomeMsg homeMsg, Home homeModel ) ->
+            Home.update homeMsg homeModel
+                |> processUpdatePage Home HomeMsg model
+
+        ( UrlClicked urlRequest, _ ) ->
             case urlRequest of
                 Internal url ->
                     ( model
@@ -50,23 +77,16 @@ update msg model =
                     , Nav.load url
                     )
 
-        UrlChanged url ->
+        ( UrlChanged url, _ ) ->
             setNewPage (match url) model
 
-        GotWindowSize viewport ->
-            let
-                device =
-                    classifyDevice
-                        { width = round viewport.viewport.width
-                        , height = round viewport.viewport.height
-                        }
-            in
-            ( { model | device = device }, Cmd.none )
+        ( GotWindowSize viewport, _ ) ->
+            setDevice (round viewport.viewport.width) (round viewport.viewport.height) model
 
-        WindowResized w h ->
+        ( WindowResized w h, _ ) ->
             ( { model | device = classifyDevice { width = w, height = h } }, Cmd.none )
 
-        NoOpFrontendMsg ->
+        _ ->
             ( model, Cmd.none )
 
 
@@ -75,17 +95,6 @@ updateFromBackend msg model =
     case msg of
         NoOpToFrontend ->
             ( model, Cmd.none )
-
-
-viewHeader : Element.Element msg
-viewHeader =
-    column []
-        [ row []
-            [ text "Avion" ]
-        , row
-            []
-            []
-        ]
 
 
 deviceToString : Device -> String
@@ -104,22 +113,25 @@ deviceToString device =
             "big"
 
 
+viewContent : Model -> ( String, Html FrontendMsg )
+viewContent model =
+    case model.page of
+        Home homeModel ->
+            ( "Aguna Home - Find good stuff with great price", Home.view model.device homeModel |> Html.map HomeMsg )
+
+        _ ->
+            ( "Aguna Home - Find good stuff with great price", Element.layout [] (text "abcd") )
+
+
 view : Model -> Browser.Document FrontendMsg
 view model =
-    { title = "Aguna - Jual Barang Berguna - Homepage"
+    let
+        ( title, content ) =
+            viewContent model
+    in
+    { title = title
     , body =
-        [ Element.layout [ clashDisplay, lineHeight150 ]
-            (column []
-                [ viewHeader
-                , column [ Font.center, paddingXY 40 0 ]
-                    [ image [ width (px 150) ] { src = "https://lamdera.app/lamdera-logo-black.png", description = "lamdera logo" }
-                    , el
-                        [ paddingXY 40 0
-                        ]
-                        (text ("Mantap Mantap yuk " ++ deviceToString model.device))
-                    ]
-                ]
-            )
+        [ content
         ]
     }
 

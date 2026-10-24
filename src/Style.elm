@@ -122,3 +122,12 @@ white =
 borderDark : Element.Color
 borderDark =
     Element.rgb255 0xCA 0xC6 0xDA
+
+
+
+-- SPACING
+
+
+paddings : Int -> Int -> Int -> Int -> Element.Attribute msg
+paddings t r b l =
+    Element.paddingEach { left = l, top = t, right = r, bottom = b }
