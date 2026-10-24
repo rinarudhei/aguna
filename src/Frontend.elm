@@ -1,10 +1,15 @@
 module Frontend exposing (..)
 
 import Browser exposing (UrlRequest(..))
+import Browser.Dom
+import Browser.Events
 import Browser.Navigation as Nav
+import Element exposing (DeviceClass(..), Orientation(..), classifyDevice, column, row)
 import Html
 import Html.Attributes as Attr
 import Lamdera
+import Routes exposing (Route, match)
+import Task
 import Types exposing (..)
 import Url
 
@@ -13,29 +18,21 @@ type alias Model =
     FrontendModel
 
 
-type Page
-    = Home
-    | Login
+setNewPage : Maybe Route -> Model -> ( Model, Cmd FrontendMsg )
+setNewPage maybeRoute model =
+    let
+        cmd =
+            Task.perform GotWindowSize Browser.Dom.getViewport
+    in
+    case maybeRoute of
+        Just Routes.Home ->
+            ( { model | page = Home }, Cmd.none )
 
+        Just Routes.Login ->
+            ( { model | page = Login }, Cmd.none )
 
-app =
-    Lamdera.frontend
-        { init = init
-        , onUrlRequest = UrlClicked
-        , onUrlChange = UrlChanged
-        , update = update
-        , updateFromBackend = updateFromBackend
-        , subscriptions = \m -> Sub.none
-        , view = view
-        }
-
-
-init : Url.Url -> Nav.Key -> ( Model, Cmd FrontendMsg )
-init url key =
-    ( { key = key
-      }
-    , Cmd.none
-    )
+        Nothing ->
+            ( { model | page = NotFound }, Cmd.none )
 
 
 update : FrontendMsg -> Model -> ( Model, Cmd FrontendMsg )
@@ -54,7 +51,20 @@ update msg model =
                     )
 
         UrlChanged url ->
-            ( model, Cmd.none )
+            setNewPage (match url) model
+
+        GotWindowSize viewport ->
+            let
+                device =
+                    classifyDevice
+                        { width = round viewport.viewport.width
+                        , height = round viewport.viewport.height
+                        }
+            in
+            ( { model | device = device }, Cmd.none )
+
+        WindowResized w h ->
+            ( { model | device = classifyDevice { width = w, height = h } }, Cmd.none )
 
         NoOpFrontendMsg ->
             ( model, Cmd.none )
@@ -67,6 +77,19 @@ updateFromBackend msg model =
             ( model, Cmd.none )
 
 
+viewHeader : Html.Html msg
+viewHeader =
+    Element.layout []
+        (column []
+            [ row []
+                []
+            , row
+                []
+                []
+            ]
+        )
+
+
 view : Model -> Browser.Document FrontendMsg
 view model =
     { title = "Aguna - Jual Barang Berguna - Homepage"
@@ -77,7 +100,40 @@ view model =
                 [ Attr.style "font-family" "sans-serif"
                 , Attr.style "padding-top" "40px"
                 ]
-                [ Html.text "" ]
+                [ Html.text "Mantap Mantap yuk" ]
             ]
         ]
     }
+
+
+initialModel : Nav.Key -> Model
+initialModel key =
+    { page = NotFound
+    , device =
+        { class = Phone
+        , orientation = Portrait
+        }
+    , key = key
+    }
+
+
+init : Url.Url -> Nav.Key -> ( Model, Cmd FrontendMsg )
+init url key =
+    setNewPage (match url) (initialModel key)
+
+
+sub : Model -> Sub FrontendMsg
+sub model =
+    Browser.Events.onResize (\w h -> WindowResized w h)
+
+
+app =
+    Lamdera.frontend
+        { init = init
+        , onUrlRequest = UrlClicked
+        , onUrlChange = UrlChanged
+        , update = update
+        , updateFromBackend = updateFromBackend
+        , subscriptions = \m -> Sub.none
+        , view = view
+        }
