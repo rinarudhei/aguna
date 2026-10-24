@@ -1,6 +1,6 @@
 module Pages.Home exposing (Model, Msg, init, update, view)
 
-import Element exposing (Device, DeviceClass(..), Element, column, el, fill, height, image, px, row, spacing, text, width)
+import Element exposing (Device, DeviceClass(..), Element, alignLeft, alignRight, column, el, fill, height, image, px, row, spacing, text, width)
 import Element.Events exposing (onClick)
 import Element.Font as Font
 import Html exposing (Html)
@@ -28,8 +28,8 @@ viewHeader deviceClass =
         _ ->
             column [ width fill ]
                 [ row [ width fill, height (px 69), clashDisplay, lineHeight150, Font.size 24, paddings 20 20 20 24 ]
-                    [ el [ Font.alignLeft ] (text "Aguna")
-                    , row [ Font.alignRight, spacing 20 ]
+                    [ el [ alignLeft ] (text "Aguna")
+                    , row [ alignRight, spacing 20 ]
                         [ image [ width (px 20), height (px 20), Font.alignLeft ] { src = "/icons/search.svg", description = "header search button" }
                         , image [ width (px 20), height (px 20), Font.alignRight, onClick HeaderMenuClicked ] { src = "/icons/menu.svg", description = "header menu button" }
                         ]

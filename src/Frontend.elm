@@ -117,7 +117,12 @@ viewContent : Model -> ( String, Html FrontendMsg )
 viewContent model =
     case model.page of
         Home homeModel ->
-            ( "Aguna Home - Find good stuff with great price", Home.view model.device homeModel |> Html.map HomeMsg )
+            ( "Aguna Home - Find good stuff with great price"
+            , Home.view
+                model.device
+                homeModel
+                |> Html.map HomeMsg
+            )
 
         _ ->
             ( "Aguna Home - Find good stuff with great price", Element.layout [] (text "abcd") )
