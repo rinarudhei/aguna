@@ -35,6 +35,14 @@ clashDisplay =
         ]
 
 
+satoshi : Element.Attribute msg
+satoshi =
+    Font.family
+        [ Font.typeface "Satoshi"
+        , Font.sansSerif
+        ]
+
+
 lineHeight : Float -> Element.Attribute msg
 lineHeight mult =
     Element.htmlAttribute (Attr.style "line-height" (String.fromFloat mult))

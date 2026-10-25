@@ -1,16 +1,15 @@
 module Pages.Home exposing (Model, Msg, init, update, view)
 
-import Element exposing (Device, DeviceClass(..), Element, alignLeft, alignRight, centerX, centerY, column, el, fill, height, image, maximum, paddingXY, px, rgba, row, spacing, text, width)
+import Element exposing (Device, DeviceClass(..), Element, alignLeft, alignRight, centerX, centerY, column, el, fill, height, image, link, maximum, paddingXY, px, rgb255, rgba, row, spacing, text, width)
 import Element.Background as Background
 import Element.Events exposing (onClick)
 import Element.Font as Font
 import Html exposing (Html)
-import Html.Attributes as HA
-import Style exposing (clashDisplay, lineHeight, lineHeight150, paddings)
+import Style exposing (clashDisplay, lineHeight150, paddings, satoshi)
 
 
 type alias Model =
-    { mobileMenuIsOpened : Bool
+    { headerMenuIsOpened : Bool
     , searchMenuOpened : Bool
     , searchMenuText : String
     }
@@ -18,15 +17,26 @@ type alias Model =
 
 initialModel : Model
 initialModel =
-    { mobileMenuIsOpened = False
+    { headerMenuIsOpened = False
     , searchMenuOpened = False
     , searchMenuText = ""
     }
 
 
-viewHeader : DeviceClass -> Element Msg
-viewHeader deviceClass =
-    case deviceClass of
+categories : Device -> Element Msg
+categories device =
+    row [ centerX, spacing 44, satoshi, Font.size 16, Font.color (rgb255 114 110 141), paddingXY 20 20 ]
+        [ link [] { url = "https://localhost:3000", label = text "Books" }
+        , link [] { url = "", label = text "Furnitures" }
+        , link [] { url = "", label = text "Cutlery" }
+        , link [] { url = "", label = text "Tumblrs" }
+        , link [] { url = "", label = text "Tools" }
+        ]
+
+
+viewHeader : Device -> Element Msg
+viewHeader device =
+    case device.class of
         Phone ->
             column [ width fill ]
                 [ row [ width fill, clashDisplay, lineHeight150, Font.size 24, paddings 20 20 20 24 ]
@@ -53,6 +63,9 @@ viewHeader deviceClass =
                 -- Separator
                 , el [ width fill, paddings 0 28 0 28 ]
                     (el [ width fill, height (px 1), Background.color (rgba 0 0 0 0.1) ] Element.none)
+
+                -- Categories
+                , categories device
                 ]
 
 
@@ -66,7 +79,7 @@ view device model =
     Element.layout
         [ width fill ]
         (column [ width (fill |> maximum 1440), centerX ]
-            [ viewHeader device.class ]
+            [ viewHeader device ]
         )
 
 
@@ -82,4 +95,4 @@ update msg model =
             ( { model | searchMenuOpened = not model.searchMenuOpened }, Cmd.none )
 
         HeaderMenuClicked ->
-            ( { model | mobileMenuIsOpened = not model.mobileMenuIsOpened }, Cmd.none )
+            ( { model | headerMenuIsOpened = not model.headerMenuIsOpened }, Cmd.none )
