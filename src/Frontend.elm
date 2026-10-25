@@ -8,14 +8,20 @@ import Element
     exposing
         ( Device
         , DeviceClass(..)
+        , Element
         , Orientation(..)
         , classifyDevice
+        , fill
         , text
+        , width
         )
 import Html exposing (Html)
+import Html.Attributes
+import Html.Events exposing (custom)
 import Lamdera
 import Pages.Home as Home
 import Routes exposing (Route, match)
+import Style exposing (customFontStyles)
 import Task
 import Types exposing (..)
 import Url
@@ -136,7 +142,8 @@ view model =
     in
     { title = title
     , body =
-        [ content
+        [ customFontStyles
+        , content
         ]
     }
 

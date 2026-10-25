@@ -43,16 +43,6 @@ satoshi =
         ]
 
 
-lineHeight : Float -> Element.Attribute msg
-lineHeight mult =
-    Element.htmlAttribute (Attr.style "line-height" (String.fromFloat mult))
-
-
-lineHeight150 : Element.Attribute msg
-lineHeight150 =
-    lineHeight 1.5
-
-
 headlineOne : Element.Attribute msg
 headlineOne =
     Font.size 36
