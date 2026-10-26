@@ -51,20 +51,20 @@ initialModel =
     }
 
 
-baseLink : String -> String -> Element Msg
+baseLink : String -> Element msg -> Element msg
 baseLink url label =
     link [ Border.width 1, Border.color white, Element.focused [ Border.color darkPrimary ] ]
-        { url = url, label = text label }
+        { url = url, label = label }
 
 
 categories : List (Element Msg)
 categories =
-    [ baseLink "" "Books"
-    , baseLink "" "Electronics"
-    , baseLink "" "Cutlery"
-    , baseLink "" "Furnitures"
-    , baseLink "" "Tools"
-    , baseLink "" "Tumblrs"
+    [ baseLink "" (text "Books")
+    , baseLink "" (text "Electronics")
+    , baseLink "" (text "Cutlery")
+    , baseLink "" (text "Furnitures")
+    , baseLink "" (text "Tools")
+    , baseLink "" (text "Tumblrs")
     ]
 
 
@@ -75,7 +75,7 @@ viewMobileMenu device model =
             column [ spacing 24, paddings 20 20 20 20, height fill, width fill, Background.color white ]
                 [ -- Panel Header
                   row [ width fill ]
-                    [ el [ alignLeft, paddings 2 0 2 0 ] (text "Aguna")
+                    [ el [ alignLeft, paddings 2 0 2 0 ] (baseLink "" (text "Aguna"))
                     , image [ alignRight, width (px 16), height (px 16), Font.alignLeft, onClick HeaderMenuClicked, Border.width 1, Border.color white, Element.focused [ Border.color darkPrimary ] ]
                         { src = "/icons/close.svg", description = "close menu button" }
                     ]
@@ -103,7 +103,7 @@ viewHeader device =
         Phone ->
             column [ width fill ]
                 [ row [ width fill, clashDisplay, Font.size 24, paddings 20 20 20 24 ]
-                    [ el [ alignLeft, paddings 2 0 2 0 ] (text "Aguna")
+                    [ el [ alignLeft, paddings 2 0 2 0 ] (baseLink "" (text "Aguna"))
                     , row [ alignRight, spacing 20 ]
                         [ baseIconButton
                             (Just SearchMenuClicked)
@@ -130,7 +130,7 @@ viewHeader device =
                                 { src = "/icons/search.svg", description = "header search button" }
                             )
                         )
-                    , el [ Font.size 24, clashDisplay, centerX, paddings 2 0 2 0 ] (text "Aguna")
+                    , el [ Font.size 24, clashDisplay, centerX, paddings 2 0 2 0 ] (baseLink "" (text "Aguna"))
                     , row [ alignRight, spacing 16 ]
                         [ baseIconButton
                             Nothing
