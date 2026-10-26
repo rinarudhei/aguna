@@ -5,21 +5,26 @@ import Element
         ( Device
         , DeviceClass(..)
         , Element
+        , alignRight
         , centerX
         , column
         , el
         , fill
         , height
+        , htmlAttribute
         , image
         , inFront
         , link
         , maximum
         , mouseOver
+        , moveDown
+        , moveLeft
         , paragraph
         , px
         , rgb255
         , rgba
         , row
+        , shrink
         , spaceEvenly
         , spacing
         , text
@@ -30,7 +35,8 @@ import Element.Border as Border
 import Element.Font as Font
 import Element.Input as Input
 import Html exposing (Html)
-import Style exposing (bodyMedium, borderGrey, clashDisplay, darkPrimary, lightGrey, paddings, satoshi, white)
+import Html.Attributes as Attr
+import Style exposing (bodyLarge, bodyMedium, borderGrey, clashDisplay, darkPrimary, headlineTwo, lightGrey, paddings, satoshi, white)
 
 
 type alias Model =
@@ -158,40 +164,149 @@ viewHeader device =
 
 viewHero : Device -> Element msg
 viewHero device =
-    column [ spacing 32, centerX, width fill, paddings 47 25 32 24 ]
-        [ -- Hero Content
-          column [ Font.color darkPrimary, spacing 12 ]
-            [ paragraph [ clashDisplay, Font.size 24 ]
-                [ text "Secondhand finds for people who love good stuff at great prices"
-                ]
-            , paragraph [ satoshi, Font.size 16 ]
-                [ text
-                    "With dozens of unique pieces and new finds arriving often, explore books, tools, furniture, electronics, and more"
-                ]
-            ]
+    case device.class of
+        Phone ->
+            column []
+                [ column [ spacing 32, centerX, width fill, paddings 47 25 32 24, Font.color darkPrimary ]
+                    [ -- Hero Content
+                      column [ spacing 12 ]
+                        [ paragraph [ clashDisplay, Font.size 24 ]
+                            [ text "Secondhand finds for people who love good stuff at great prices"
+                            ]
+                        , paragraph [ satoshi, Font.size 16 ]
+                            [ text
+                                "With dozens of unique pieces and new finds arriving often, explore books, tools, furniture, electronics, and more"
+                            ]
+                        ]
 
-        -- Hero Button
-        , Input.button
-            [ paddings 20 16 20 16
-            , Background.color lightGrey
-            , mouseOver [ Background.color borderGrey ]
-            , Border.color lightGrey
-            , Border.width 1
-            , Element.focused [ Border.color darkPrimary ]
-            , width fill
-            ]
-            { onPress = Nothing
-            , label =
-                el
-                    [ Font.center
-                    , Font.size 16
-                    , bodyMedium
-                    , satoshi
-                    , width fill
+                    -- Hero Button
+                    , Input.button
+                        [ paddings 20 32 20 32
+                        , Background.color lightGrey
+                        , mouseOver [ Background.color borderGrey ]
+                        , Border.color lightGrey
+                        , Border.width 1
+                        , Element.focused [ Border.color darkPrimary ]
+                        , width fill
+                        ]
+                        { onPress = Nothing
+                        , label =
+                            el
+                                [ Font.center
+                                , bodyMedium
+                                , satoshi
+                                , width fill
+                                , Font.color darkPrimary
+                                ]
+                                (text "View Collection")
+                        }
                     ]
-                    (text "View Collection")
-            }
-        ]
+                , image [ width fill ] { description = "hero image", src = "/images/hero.jpeg" }
+                ]
+
+        Tablet ->
+            image
+                [ width fill
+                , inFront
+                    (column
+                        [ spacing 50
+                        , centerX
+                        , width (fill |> maximum 440)
+                        , paddings 38 51 36 46
+                        , Font.color darkPrimary
+                        , Background.color white
+                        , alignRight
+                        , moveDown 60
+                        , moveLeft 80
+                        ]
+                        [ -- Hero Content
+                          column [ spacing 20 ]
+                            [ paragraph [ clashDisplay, headlineTwo ]
+                                [ text "Secondhand finds for people who love good stuff at great prices"
+                                ]
+                            , paragraph [ satoshi, bodyLarge ]
+                                [ text
+                                    "With dozens of unique pieces and new finds arriving often, explore books, tools, furniture, electronics, and more"
+                                ]
+                            ]
+
+                        -- Hero Button
+                        , Input.button
+                            [ paddings 20 32 20 32
+                            , Background.color lightGrey
+                            , mouseOver [ Background.color borderGrey ]
+                            , Border.color white
+                            , Border.width 1
+                            , Element.focused [ Border.color darkPrimary ]
+                            , width shrink
+                            ]
+                            { onPress = Nothing
+                            , label =
+                                el
+                                    [ Font.center
+                                    , bodyMedium
+                                    , satoshi
+                                    , width fill
+                                    , Font.color darkPrimary
+                                    ]
+                                    (text "View Collection")
+                            }
+                        ]
+                    )
+                ]
+                { description = "hero image", src = "/images/hero.jpeg" }
+
+        _ ->
+            image
+                [ width fill
+                , inFront
+                    (column
+                        [ spacing 157
+                        , centerX
+                        , width (fill |> maximum 640)
+                        , paddings 48 61 46 56
+                        , Font.color darkPrimary
+                        , Background.color white
+                        , alignRight
+                        , moveDown 130
+                        , moveLeft 80
+                        ]
+                        [ -- Hero Content
+                          column [ spacing 20 ]
+                            [ paragraph [ clashDisplay, headlineTwo ]
+                                [ text "Secondhand finds for people who love good stuff at great prices"
+                                ]
+                            , paragraph [ satoshi, bodyLarge ]
+                                [ text
+                                    "With dozens of unique pieces and new finds arriving often, explore books, tools, furniture, electronics, and more"
+                                ]
+                            ]
+
+                        -- Hero Button
+                        , Input.button
+                            [ paddings 20 32 20 32
+                            , Background.color lightGrey
+                            , mouseOver [ Background.color borderGrey ]
+                            , Border.color white
+                            , Border.width 1
+                            , Element.focused [ Border.color darkPrimary ]
+                            , width shrink
+                            ]
+                            { onPress = Nothing
+                            , label =
+                                el
+                                    [ Font.center
+                                    , bodyMedium
+                                    , satoshi
+                                    , width fill
+                                    , Font.color darkPrimary
+                                    ]
+                                    (text "View Collection")
+                            }
+                        ]
+                    )
+                ]
+                { description = "hero image", src = "/images/hero.jpeg" }
 
 
 init : ( Model, Cmd Msg )
@@ -203,7 +318,7 @@ view : Device -> Model -> Html Msg
 view device model =
     Element.layout []
         (column
-            [ width (fill |> maximum 1440)
+            [ width (fill |> maximum 1920)
             , centerX
             , height fill
             , inFront (viewMobileMenu device model)
