@@ -17,6 +17,7 @@ import Element
         , link
         , maximum
         , mouseOver
+        , none
         , paragraph
         , px
         , rgb255
@@ -30,8 +31,9 @@ import Element.Background as Background
 import Element.Border as Border
 import Element.Events exposing (onClick)
 import Element.Font as Font
+import Element.Input as Input
 import Html exposing (Html)
-import Style exposing (bodyMedium, clashDisplay, darkPrimary, lightGrey, paddings, satoshi, white)
+import Style exposing (bodyMedium, borderGrey, clashDisplay, darkPrimary, lightGrey, paddings, satoshi, white)
 
 
 type alias Model =
@@ -49,14 +51,20 @@ initialModel =
     }
 
 
+baseLink : String -> String -> Element Msg
+baseLink url label =
+    link [ Border.width 1, Border.color white, Element.focused [ Border.color darkPrimary ] ]
+        { url = url, label = text label }
+
+
 categories : List (Element Msg)
 categories =
-    [ link [] { url = "", label = text "Books" }
-    , link [] { url = "", label = text "Electronics" }
-    , link [] { url = "", label = text "Cutlery" }
-    , link [] { url = "", label = text "Furnitures" }
-    , link [] { url = "", label = text "Tools" }
-    , link [] { url = "", label = text "Tumblrs" }
+    [ baseLink "" "Books"
+    , baseLink "" "Electronics"
+    , baseLink "" "Cutlery"
+    , baseLink "" "Furnitures"
+    , baseLink "" "Tools"
+    , baseLink "" "Tumblrs"
     ]
 
 
@@ -68,7 +76,7 @@ viewMobileMenu device model =
                 [ -- Panel Header
                   row [ width fill ]
                     [ el [ alignLeft, paddings 2 0 2 0 ] (text "Aguna")
-                    , image [ alignRight, width (px 16), height (px 16), Font.alignLeft, onClick HeaderMenuClicked ]
+                    , image [ alignRight, width (px 16), height (px 16), Font.alignLeft, onClick HeaderMenuClicked, Border.width 1, Border.color white, Element.focused [ Border.color darkPrimary ] ]
                         { src = "/icons/close.svg", description = "close menu button" }
                     ]
                 , column [ Font.alignLeft, spacing 44, satoshi, Font.size 16, Font.color (rgb255 114 110 141), paddings 20 0 20 0 ]
@@ -79,6 +87,16 @@ viewMobileMenu device model =
             Element.none
 
 
+baseIconButton : Maybe msg -> Element msg -> Element msg
+baseIconButton maybeMsg child =
+    Input.button
+        [ Border.width 1
+        , Border.color white
+        , Element.focused [ Border.color darkPrimary ]
+        ]
+        { onPress = maybeMsg, label = child }
+
+
 viewHeader : Device -> Element Msg
 viewHeader device =
     case device.class of
@@ -87,10 +105,16 @@ viewHeader device =
                 [ row [ width fill, clashDisplay, Font.size 24, paddings 20 20 20 24 ]
                     [ el [ alignLeft, paddings 2 0 2 0 ] (text "Aguna")
                     , row [ alignRight, spacing 20 ]
-                        [ image [ width (px 16), height (px 16), Font.alignLeft, onClick SearchMenuClicked ]
-                            { src = "/icons/search.svg", description = "header search button" }
-                        , image [ width (px 16), height (px 16), Font.alignRight, onClick HeaderMenuClicked ]
-                            { src = "/icons/menu.svg", description = "header menu button" }
+                        [ baseIconButton
+                            (Just SearchMenuClicked)
+                            (image [ width (px 16), height (px 16), Font.alignLeft, onClick SearchMenuClicked ]
+                                { src = "/icons/search.svg", description = "header search button" }
+                            )
+                        , baseIconButton
+                            (Just HeaderMenuClicked)
+                            (image [ width (px 16), height (px 16), Font.alignRight, onClick HeaderMenuClicked ]
+                                { src = "/icons/menu.svg", description = "header menu button" }
+                            )
                         ]
                     ]
                 ]
@@ -99,11 +123,26 @@ viewHeader device =
             column [ width fill ]
                 [ -- Top Header
                   row [ width fill, paddings 20 28 20 28 ]
-                    [ el [ alignLeft ] (image [ width (px 16), height (px 16), Font.alignLeft, onClick SearchMenuClicked ] { src = "/icons/search.svg", description = "header search button" })
+                    [ el [ alignLeft ]
+                        (baseIconButton
+                            (Just SearchMenuClicked)
+                            (image [ width (px 16), height (px 16), Font.alignLeft, onClick SearchMenuClicked ]
+                                { src = "/icons/search.svg", description = "header search button" }
+                            )
+                        )
                     , el [ Font.size 24, clashDisplay, centerX, paddings 2 0 2 0 ] (text "Aguna")
                     , row [ alignRight, spacing 16 ]
-                        [ image [ width (px 16), height (px 16), Font.alignLeft ] { src = "/icons/cart.svg", description = "header cart button" }
-                        , image [ width (px 16), height (px 16), Font.alignRight ] { src = "/icons/user.svg", description = "header user button" }
+                        [ baseIconButton
+                            Nothing
+                            (image
+                                [ width (px 16), height (px 16), Font.alignLeft ]
+                                { src = "/icons/cart.svg", description = "header cart button" }
+                            )
+                        , baseIconButton
+                            Nothing
+                            (image [ width (px 16), height (px 16), Font.alignRight ]
+                                { src = "/icons/user.svg", description = "header user button" }
+                            )
                         ]
                     ]
 
@@ -132,21 +171,26 @@ viewHero device =
             ]
 
         -- Hero Button
-        , el
+        , Input.button
             [ paddings 20 16 20 16
             , Background.color lightGrey
-            , mouseOver [ Border.color (rgb255 0x4E 0x4D 0x93) ]
+            , mouseOver [ Background.color borderGrey ]
+            , Border.color lightGrey
+            , Border.width 1
+            , Element.focused [ Border.color darkPrimary ]
             , width fill
             ]
-            (el
-                [ Font.center
-                , Font.size 16
-                , bodyMedium
-                , satoshi
-                , width fill
-                ]
-                (text "View Collection")
-            )
+            { onPress = Nothing
+            , label =
+                el
+                    [ Font.center
+                    , Font.size 16
+                    , bodyMedium
+                    , satoshi
+                    , width fill
+                    ]
+                    (text "View Collection")
+            }
         ]
 
 
