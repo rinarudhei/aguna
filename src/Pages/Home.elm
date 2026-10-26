@@ -5,8 +5,6 @@ import Element
         ( Device
         , DeviceClass(..)
         , Element
-        , alignLeft
-        , alignRight
         , centerX
         , column
         , el
@@ -17,19 +15,18 @@ import Element
         , link
         , maximum
         , mouseOver
-        , none
         , paragraph
         , px
         , rgb255
         , rgba
         , row
+        , spaceEvenly
         , spacing
         , text
         , width
         )
 import Element.Background as Background
 import Element.Border as Border
-import Element.Events exposing (onClick)
 import Element.Font as Font
 import Element.Input as Input
 import Html exposing (Html)
@@ -72,12 +69,15 @@ viewMobileMenu : Device -> Model -> Element Msg
 viewMobileMenu device model =
     case ( device.class, model.headerMenuIsOpened ) of
         ( Phone, True ) ->
-            column [ spacing 24, paddings 20 20 20 20, height fill, width fill, Background.color white ]
+            column [ spacing 24, paddings 20 20 20 24, height fill, width fill, Background.color white ]
                 [ -- Panel Header
-                  row [ width fill ]
-                    [ el [ alignLeft, paddings 2 0 2 0 ] (baseLink "" (text "Aguna"))
-                    , image [ alignRight, width (px 16), height (px 16), Font.alignLeft, onClick HeaderMenuClicked, Border.width 1, Border.color white, Element.focused [ Border.color darkPrimary ] ]
-                        { src = "/icons/close.svg", description = "close menu button" }
+                  row [ width fill, spaceEvenly ]
+                    [ el [ paddings 2 0 2 0, clashDisplay, Font.size 24 ] (baseLink "" (text "Aguna"))
+                    , baseIconButton
+                        (Just HeaderMenuClicked)
+                        (image [ width (px 16), height (px 16) ]
+                            { src = "/icons/close.svg", description = "close menu button" }
+                        )
                     ]
                 , column [ Font.alignLeft, spacing 44, satoshi, Font.size 16, Font.color (rgb255 114 110 141), paddings 20 0 20 0 ]
                     categories
@@ -102,17 +102,17 @@ viewHeader device =
     case device.class of
         Phone ->
             column [ width fill ]
-                [ row [ width fill, clashDisplay, Font.size 24, paddings 20 20 20 24 ]
-                    [ el [ alignLeft, paddings 2 0 2 0 ] (baseLink "" (text "Aguna"))
-                    , row [ alignRight, spacing 20 ]
+                [ row [ width fill, clashDisplay, Font.size 24, paddings 20 20 20 24, spaceEvenly ]
+                    [ el [ paddings 2 0 2 0 ] (baseLink "" (text "Aguna"))
+                    , row [ spacing 20 ]
                         [ baseIconButton
                             (Just SearchMenuClicked)
-                            (image [ width (px 16), height (px 16), Font.alignLeft, onClick SearchMenuClicked ]
+                            (image [ width (px 16), height (px 16) ]
                                 { src = "/icons/search.svg", description = "header search button" }
                             )
                         , baseIconButton
                             (Just HeaderMenuClicked)
-                            (image [ width (px 16), height (px 16), Font.alignRight, onClick HeaderMenuClicked ]
+                            (image [ width (px 16), height (px 16) ]
                                 { src = "/icons/menu.svg", description = "header menu button" }
                             )
                         ]
@@ -123,24 +123,24 @@ viewHeader device =
             column [ width fill ]
                 [ -- Top Header
                   row [ width fill, paddings 20 28 20 28 ]
-                    [ el [ alignLeft ]
+                    [ el []
                         (baseIconButton
                             (Just SearchMenuClicked)
-                            (image [ width (px 16), height (px 16), Font.alignLeft, onClick SearchMenuClicked ]
+                            (image [ width (px 16), height (px 16) ]
                                 { src = "/icons/search.svg", description = "header search button" }
                             )
                         )
                     , el [ Font.size 24, clashDisplay, centerX, paddings 2 0 2 0 ] (baseLink "" (text "Aguna"))
-                    , row [ alignRight, spacing 16 ]
+                    , row [ spacing 16 ]
                         [ baseIconButton
                             Nothing
                             (image
-                                [ width (px 16), height (px 16), Font.alignLeft ]
+                                [ width (px 16), height (px 16) ]
                                 { src = "/icons/cart.svg", description = "header cart button" }
                             )
                         , baseIconButton
                             Nothing
-                            (image [ width (px 16), height (px 16), Font.alignRight ]
+                            (image [ width (px 16), height (px 16) ]
                                 { src = "/icons/user.svg", description = "header user button" }
                             )
                         ]
