@@ -19,6 +19,7 @@ import Element
         , mouseOver
         , moveDown
         , moveLeft
+        , none
         , paragraph
         , px
         , rgb255
@@ -205,8 +206,10 @@ viewHero device =
                 ]
 
         Tablet ->
-            image
+            el
                 [ width fill
+                , height (px 504)
+                , Background.image "/images/hero.jpeg"
                 , inFront
                     (column
                         [ spacing 50
@@ -217,7 +220,7 @@ viewHero device =
                         , Background.color white
                         , alignRight
                         , moveDown 60
-                        , moveLeft 80
+                        , moveLeft 60
                         ]
                         [ -- Hero Content
                           column [ spacing 20 ]
@@ -254,11 +257,13 @@ viewHero device =
                         ]
                     )
                 ]
-                { description = "hero image", src = "/images/hero.jpeg" }
+                none
 
         _ ->
-            image
+            el
                 [ width fill
+                , height (px 704)
+                , Background.image "/images/hero.jpeg"
                 , inFront
                     (column
                         [ spacing 157
@@ -306,7 +311,8 @@ viewHero device =
                         ]
                     )
                 ]
-                { description = "hero image", src = "/images/hero.jpeg" }
+                -- { description = "hero image", src = "/images/hero.jpeg" }
+                none
 
 
 init : ( Model, Cmd Msg )
