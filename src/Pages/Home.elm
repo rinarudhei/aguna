@@ -8,35 +8,42 @@ import Element
         , Length
         , alignRight
         , centerX
+        , clip
+        , clipX
         , column
         , el
         , fill
         , height
+        , html
         , image
         , inFront
+        , layout
         , link
         , maximum
         , mouseOver
         , moveDown
         , moveLeft
         , none
+        , padding
         , paragraph
         , px
         , rgb255
         , rgba
         , row
+        , scrollbarX
         , shrink
         , spaceEvenly
         , spacing
         , text
         , width
+        , wrappedRow
         )
 import Element.Background as Background
 import Element.Border as Border
-import Element.Font as Font
+import Element.Font as Font exposing (justify)
 import Element.Input as Input
-import Html exposing (Html)
-import Style exposing (bodyLarge, bodyMedium, borderGrey, clashDisplay, darkPrimary, headlineTwo, lightGrey, paddings, satoshi, white)
+import Html exposing (Html, br)
+import Style exposing (bodyLarge, bodyMedium, borderGrey, clashDisplay, darkPrimary, headlineFour, headlineThree, headlineTwo, lightGrey, paddings, satoshi, white)
 
 
 type alias Model =
@@ -179,7 +186,7 @@ viewHeroButton device =
         , Border.color lightGrey
         , Border.width 1
         , Element.focused [ Border.color darkPrimary ]
-        , width fill
+        , width buttonLength
         ]
         { onPress = Nothing
         , label =
@@ -306,6 +313,104 @@ viewHero device =
             viewBigHero device
 
 
+valueProposition :
+    Device
+    -> { icon : String, iconDesc : String, title : String, description : String }
+    -> Element msg
+valueProposition device cardConfig =
+    let
+        ( cardWidth, cardPaddings ) =
+            case device.class of
+                Phone ->
+                    ( width (px 342), paddings 36 24 36 24 )
+
+                Tablet ->
+                    ( width (px 265), paddings 36 24 36 24 )
+
+                _ ->
+                    ( width (px 305), paddings 48 48 48 48 )
+    in
+    el [ Background.color lightGrey, cardWidth, cardPaddings ]
+        (column [ spacing 12 ]
+            [ image [ width (px 24), height (px 24) ]
+                { src = cardConfig.icon, description = cardConfig.iconDesc }
+            , paragraph
+                [ headlineFour, Font.color darkPrimary, clashDisplay ]
+                [ text cardConfig.title ]
+            , paragraph
+                [ bodyMedium, Font.color darkPrimary, satoshi ]
+                [ text cardConfig.description ]
+            ]
+        )
+
+
+valuePropositions : Device -> Element msg
+valuePropositions device =
+    let
+        layoutStyles =
+            case device.class of
+                Phone ->
+                    [ paddings 48 24 50 25, spacing 36, centerX ]
+
+                Tablet ->
+                    [ paddings 48 24 50 24, spacing 36, centerX, width (fill |> maximum 600) ]
+
+                _ ->
+                    [ paddings 80 80 82 80, spacing 36, centerX, width shrink ]
+
+        layoutContainerStyles =
+            case device.class of
+                Phone ->
+                    [ spacing 26 ]
+
+                Tablet ->
+                    [ spacing 22, spaceEvenly ]
+
+                _ ->
+                    [ spacing 22 ]
+
+        title =
+            case device.class of
+                Phone ->
+                    paragraph [ headlineFour, Font.color darkPrimary, clashDisplay ]
+                        [ text "What makes our brand"
+                        , html <| br [] []
+                        , text "different"
+                        ]
+
+                _ ->
+                    paragraph [ headlineThree, Font.color darkPrimary, clashDisplay, Font.center ]
+                        [ text "What makes our brand different"
+                        ]
+
+        layoutContainer attrs children =
+            case device.class of
+                Phone ->
+                    column attrs children
+
+                _ ->
+                    wrappedRow attrs children
+    in
+    column
+        layoutStyles
+        [ title
+        , layoutContainer layoutContainerStyles
+            [ valueProposition
+                device
+                { icon = "icons/delivery.svg", iconDesc = "deliver icon", title = "Next day as standard", description = "Order before 3pm and get your order the next day" }
+            , valueProposition
+                device
+                { icon = "icons/checkmark.svg", iconDesc = "checkmark icon", title = "High quality stuff", description = "We only sell sorted high-quality pre-loved products" }
+            , valueProposition
+                device
+                { icon = "icons/purchase.svg", iconDesc = "purchase icon", title = "Unbeatable prices", description = "You won't find better prices anywhere" }
+            , valueProposition
+                device
+                { icon = "icons/sprout.svg", iconDesc = "sprout icon", title = "Recycled packaging", description = "We use 100% recycled packaging" }
+            ]
+        ]
+
+
 init : ( Model, Cmd Msg )
 init =
     ( initialModel, Cmd.none )
@@ -322,6 +427,7 @@ view device model =
             ]
             [ viewHeader device
             , viewHero device
+            , valuePropositions device
             ]
         )
 
