@@ -5,13 +5,13 @@ import Element
         ( Device
         , DeviceClass(..)
         , Element
+        , Length
         , alignRight
         , centerX
         , column
         , el
         , fill
         , height
-        , htmlAttribute
         , image
         , inFront
         , link
@@ -36,7 +36,6 @@ import Element.Border as Border
 import Element.Font as Font
 import Element.Input as Input
 import Html exposing (Html)
-import Html.Attributes as Attr
 import Style exposing (bodyLarge, bodyMedium, borderGrey, clashDisplay, darkPrimary, headlineTwo, lightGrey, paddings, satoshi, white)
 
 
@@ -163,156 +162,148 @@ viewHeader device =
                 ]
 
 
+viewHeroButton : Device -> Element msg
+viewHeroButton device =
+    let
+        buttonLength =
+            if device.class == Phone then
+                fill
+
+            else
+                shrink
+    in
+    Input.button
+        [ paddings 20 32 20 32
+        , Background.color lightGrey
+        , mouseOver [ Background.color borderGrey ]
+        , Border.color lightGrey
+        , Border.width 1
+        , Element.focused [ Border.color darkPrimary ]
+        , width fill
+        ]
+        { onPress = Nothing
+        , label =
+            el
+                [ Font.center
+                , bodyMedium
+                , satoshi
+                , width buttonLength
+                , Font.color darkPrimary
+                ]
+                (text "View Collection")
+        }
+
+
+viewHeroContent : Device -> Element msg
+viewHeroContent device =
+    let
+        { paragraphSpacing, titleFontSize, subtitleFontSize, dynamicSubtitle } =
+            case device.class of
+                Phone ->
+                    { paragraphSpacing = spacing 12
+                    , titleFontSize = Font.size 24
+                    , subtitleFontSize = Font.size 16
+                    , dynamicSubtitle = "With dozens of unique pieces and new finds arriving often, explore books, tools, furniture, electronics, and more"
+                    }
+
+                _ ->
+                    { paragraphSpacing = spacing 20
+                    , titleFontSize = headlineTwo
+                    , subtitleFontSize = bodyLarge
+                    , dynamicSubtitle = "Explore our pre-loved books and more"
+                    }
+    in
+    column [ paragraphSpacing ]
+        [ paragraph [ clashDisplay, titleFontSize ]
+            [ text "Secondhand finds for people who love good stuff at great prices"
+            ]
+        , paragraph [ satoshi, subtitleFontSize ]
+            [ text
+                dynamicSubtitle
+            ]
+        ]
+
+
+heroConfig :
+    Device
+    ->
+        { heroImageHeight : Length
+        , columnSpacing : Element.Attribute msg
+        , contentPaddings : Element.Attribute msg
+        , contentMoveDown : Element.Attribute msg
+        , contentMoveLeft : Element.Attribute msg
+        , maxWidth : Int
+        }
+heroConfig device =
+    case device.class of
+        Tablet ->
+            { heroImageHeight = px 504
+            , columnSpacing = spacing 50
+            , contentPaddings = paddings 38 51 36 46
+            , contentMoveDown = moveDown 60
+            , contentMoveLeft = moveLeft 60
+            , maxWidth = 440
+            }
+
+        _ ->
+            { heroImageHeight = px 704
+            , columnSpacing = spacing 157
+            , contentMoveDown = moveDown 130
+            , contentPaddings = paddings 48 61 46 56
+            , contentMoveLeft = moveLeft 80
+            , maxWidth = 640
+            }
+
+
+viewBigHero : Device -> Element msg
+viewBigHero device =
+    case device.class of
+        Phone ->
+            none
+
+        _ ->
+            let
+                { heroImageHeight, columnSpacing, contentPaddings, contentMoveDown, contentMoveLeft, maxWidth } =
+                    heroConfig device
+            in
+            el
+                [ width fill
+                , height heroImageHeight
+                , Background.image "/images/hero.jpeg"
+                , inFront
+                    (column
+                        [ columnSpacing
+                        , centerX
+                        , width (fill |> maximum maxWidth)
+                        , contentPaddings
+                        , Font.color darkPrimary
+                        , Background.color white
+                        , alignRight
+                        , contentMoveDown
+                        , contentMoveLeft
+                        ]
+                        [ viewHeroContent device
+                        , viewHeroButton device
+                        ]
+                    )
+                ]
+                none
+
+
 viewHero : Device -> Element msg
 viewHero device =
     case device.class of
         Phone ->
             column []
                 [ column [ spacing 32, centerX, width fill, paddings 47 25 32 24, Font.color darkPrimary ]
-                    [ -- Hero Content
-                      column [ spacing 12 ]
-                        [ paragraph [ clashDisplay, Font.size 24 ]
-                            [ text "Secondhand finds for people who love good stuff at great prices"
-                            ]
-                        , paragraph [ satoshi, Font.size 16 ]
-                            [ text
-                                "With dozens of unique pieces and new finds arriving often, explore books, tools, furniture, electronics, and more"
-                            ]
-                        ]
-
-                    -- Hero Button
-                    , Input.button
-                        [ paddings 20 32 20 32
-                        , Background.color lightGrey
-                        , mouseOver [ Background.color borderGrey ]
-                        , Border.color lightGrey
-                        , Border.width 1
-                        , Element.focused [ Border.color darkPrimary ]
-                        , width fill
-                        ]
-                        { onPress = Nothing
-                        , label =
-                            el
-                                [ Font.center
-                                , bodyMedium
-                                , satoshi
-                                , width fill
-                                , Font.color darkPrimary
-                                ]
-                                (text "View Collection")
-                        }
+                    [ viewHeroContent device
+                    , viewHeroButton device
                     ]
                 , image [ width fill ] { description = "hero image", src = "/images/hero.jpeg" }
                 ]
 
-        Tablet ->
-            el
-                [ width fill
-                , height (px 504)
-                , Background.image "/images/hero.jpeg"
-                , inFront
-                    (column
-                        [ spacing 50
-                        , centerX
-                        , width (fill |> maximum 440)
-                        , paddings 38 51 36 46
-                        , Font.color darkPrimary
-                        , Background.color white
-                        , alignRight
-                        , moveDown 60
-                        , moveLeft 60
-                        ]
-                        [ -- Hero Content
-                          column [ spacing 20 ]
-                            [ paragraph [ clashDisplay, headlineTwo ]
-                                [ text "Secondhand finds for people who love good stuff at great prices"
-                                ]
-                            , paragraph [ satoshi, bodyLarge ]
-                                [ text
-                                    "With dozens of unique pieces and new finds arriving often, explore books, tools, furniture, electronics, and more"
-                                ]
-                            ]
-
-                        -- Hero Button
-                        , Input.button
-                            [ paddings 20 32 20 32
-                            , Background.color lightGrey
-                            , mouseOver [ Background.color borderGrey ]
-                            , Border.color white
-                            , Border.width 1
-                            , Element.focused [ Border.color darkPrimary ]
-                            , width shrink
-                            ]
-                            { onPress = Nothing
-                            , label =
-                                el
-                                    [ Font.center
-                                    , bodyMedium
-                                    , satoshi
-                                    , width fill
-                                    , Font.color darkPrimary
-                                    ]
-                                    (text "View Collection")
-                            }
-                        ]
-                    )
-                ]
-                none
-
         _ ->
-            el
-                [ width fill
-                , height (px 704)
-                , Background.image "/images/hero.jpeg"
-                , inFront
-                    (column
-                        [ spacing 157
-                        , centerX
-                        , width (fill |> maximum 640)
-                        , paddings 48 61 46 56
-                        , Font.color darkPrimary
-                        , Background.color white
-                        , alignRight
-                        , moveDown 130
-                        , moveLeft 80
-                        ]
-                        [ -- Hero Content
-                          column [ spacing 20 ]
-                            [ paragraph [ clashDisplay, headlineTwo ]
-                                [ text "Secondhand finds for people who love good stuff at great prices"
-                                ]
-                            , paragraph [ satoshi, bodyLarge ]
-                                [ text
-                                    "With dozens of unique pieces and new finds arriving often, explore books, tools, furniture, electronics, and more"
-                                ]
-                            ]
-
-                        -- Hero Button
-                        , Input.button
-                            [ paddings 20 32 20 32
-                            , Background.color lightGrey
-                            , mouseOver [ Background.color borderGrey ]
-                            , Border.color white
-                            , Border.width 1
-                            , Element.focused [ Border.color darkPrimary ]
-                            , width shrink
-                            ]
-                            { onPress = Nothing
-                            , label =
-                                el
-                                    [ Font.center
-                                    , bodyMedium
-                                    , satoshi
-                                    , width fill
-                                    , Font.color darkPrimary
-                                    ]
-                                    (text "View Collection")
-                            }
-                        ]
-                    )
-                ]
-                -- { description = "hero image", src = "/images/hero.jpeg" }
-                none
+            viewBigHero device
 
 
 init : ( Model, Cmd Msg )
