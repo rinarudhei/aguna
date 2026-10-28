@@ -8,8 +8,6 @@ import Element
         , Length
         , alignRight
         , centerX
-        , clip
-        , clipX
         , column
         , el
         , fill
@@ -17,20 +15,17 @@ import Element
         , html
         , image
         , inFront
-        , layout
         , link
         , maximum
         , mouseOver
         , moveDown
         , moveLeft
         , none
-        , padding
         , paragraph
         , px
         , rgb255
         , rgba
         , row
-        , scrollbarX
         , shrink
         , spaceEvenly
         , spacing
@@ -40,10 +35,38 @@ import Element
         )
 import Element.Background as Background
 import Element.Border as Border
-import Element.Font as Font exposing (justify)
+import Element.Font as Font
 import Element.Input as Input
 import Html exposing (Html, br)
+import Html.Attributes as HtmlAttr
 import Style exposing (bodyLarge, bodyMedium, borderGrey, clashDisplay, darkPrimary, headlineFour, headlineThree, headlineTwo, lightGrey, paddings, satoshi, white)
+
+
+ariaLabel : String -> Element.Attribute msg
+ariaLabel =
+    HtmlAttr.attribute "aria-label" >> Element.htmlAttribute
+
+
+ariaExpanded : Bool -> Element.Attribute msg
+ariaExpanded isOpen =
+    HtmlAttr.attribute "aria-expanded"
+        (if isOpen then
+            "true"
+
+         else
+            "false"
+        )
+        |> Element.htmlAttribute
+
+
+ariaHidden : Element.Attribute msg
+ariaHidden =
+    HtmlAttr.attribute "aria-hidden" "true" |> Element.htmlAttribute
+
+
+role : String -> Element.Attribute msg
+role r =
+    HtmlAttr.attribute "role" r |> Element.htmlAttribute
 
 
 type alias Model =
@@ -82,14 +105,17 @@ viewMobileMenu : Device -> Model -> Element Msg
 viewMobileMenu device model =
     case ( device.class, model.headerMenuIsOpened ) of
         ( Phone, True ) ->
-            column [ spacing 24, paddings 20 20 20 24, height fill, width fill, Background.color white ]
+            column [ spacing 24, paddings 20 20 20 24, height fill, width fill, Background.color white, ariaLabel "Main menu", role "dialog", ariaExpanded True ]
                 [ -- Panel Header
                   row [ width fill, spaceEvenly ]
                     [ el [ paddings 2 0 2 0, clashDisplay, Font.size 24 ] (baseLink "" (text "Aguna"))
                     , baseIconButton
-                        (Just HeaderMenuClicked)
-                        (image [ width (px 16), height (px 16) ]
-                            { src = "/icons/close.svg", description = "close menu button" }
+                        { onPress = Just HeaderMenuClicked
+                        , label = "Close menu"
+                        , expanded = Just False
+                        }
+                        (image [ width (px 16), height (px 16), ariaHidden ]
+                            { src = "/icons/close.svg", description = "" }
                         )
                     ]
                 , column [ Font.alignLeft, spacing 44, satoshi, Font.size 16, Font.color (rgb255 114 110 141), paddings 20 0 20 0 ]
@@ -100,61 +126,85 @@ viewMobileMenu device model =
             Element.none
 
 
-baseIconButton : Maybe msg -> Element msg -> Element msg
-baseIconButton maybeMsg child =
+baseIconButton :
+    { onPress : Maybe msg
+    , label : String
+    , expanded : Maybe Bool
+    }
+    -> Element msg
+    -> Element msg
+baseIconButton config child =
     Input.button
-        [ Border.width 1
-        , Border.color white
-        , Element.focused [ Border.color darkPrimary ]
-        ]
-        { onPress = maybeMsg, label = child }
+        ([ Border.width 1
+         , Border.color white
+         , Element.focused [ Border.color darkPrimary ]
+         , ariaLabel config.label
+         ]
+            ++ (case config.expanded of
+                    Just isOpen ->
+                        [ ariaExpanded isOpen ]
+
+                    Nothing ->
+                        []
+               )
+        )
+        { onPress = config.onPress, label = child }
 
 
-viewHeader : Device -> Element Msg
-viewHeader device =
+viewHeader : Device -> Model -> Element Msg
+viewHeader device model =
     case device.class of
         Phone ->
-            column [ width fill ]
+            column [ width fill, role "banner" ]
                 [ row [ width fill, clashDisplay, Font.size 24, paddings 20 20 20 24, spaceEvenly ]
                     [ el [ paddings 2 0 2 0 ] (baseLink "" (text "Aguna"))
                     , row [ spacing 20 ]
                         [ baseIconButton
-                            (Just SearchMenuClicked)
-                            (image [ width (px 16), height (px 16) ]
-                                { src = "/icons/search.svg", description = "header search button" }
+                            { onPress = Just SearchMenuClicked, label = "Search", expanded = Just model.searchMenuOpened }
+                            (image [ width (px 16), height (px 16), ariaHidden ]
+                                { src = "/icons/search.svg", description = "" }
                             )
                         , baseIconButton
-                            (Just HeaderMenuClicked)
-                            (image [ width (px 16), height (px 16) ]
-                                { src = "/icons/menu.svg", description = "header menu button" }
+                            { onPress = Just HeaderMenuClicked, label = "Open Menu", expanded = Just model.headerMenuIsOpened }
+                            (image [ width (px 16), height (px 16), ariaHidden ]
+                                { src = "/icons/menu.svg", description = "" }
                             )
                         ]
                     ]
                 ]
 
         _ ->
-            column [ width fill ]
+            column [ width fill, role "banner" ]
                 [ -- Top Header
                   row [ width fill, paddings 20 28 20 28 ]
                     [ el []
                         (baseIconButton
-                            (Just SearchMenuClicked)
-                            (image [ width (px 16), height (px 16) ]
-                                { src = "/icons/search.svg", description = "header search button" }
+                            { onPress = Just SearchMenuClicked
+                            , label = "Search"
+                            , expanded = Just model.searchMenuOpened
+                            }
+                            (image [ width (px 16), height (px 16), ariaHidden ]
+                                { src = "/icons/search.svg", description = "" }
                             )
                         )
                     , el [ Font.size 24, clashDisplay, centerX, paddings 2 0 2 0 ] (baseLink "" (text "Aguna"))
                     , row [ spacing 16 ]
                         [ baseIconButton
-                            Nothing
+                            { onPress = Just SearchMenuClicked
+                            , label = "Cart"
+                            , expanded = Just model.searchMenuOpened
+                            }
                             (image
-                                [ width (px 16), height (px 16) ]
-                                { src = "/icons/cart.svg", description = "header cart button" }
+                                [ width (px 16), height (px 16), ariaHidden ]
+                                { src = "/icons/cart.svg", description = "" }
                             )
                         , baseIconButton
-                            Nothing
-                            (image [ width (px 16), height (px 16) ]
-                                { src = "/icons/user.svg", description = "header user button" }
+                            { onPress = Nothing
+                            , label = "Account"
+                            , expanded = Nothing
+                            }
+                            (image [ width (px 16), height (px 16), ariaHidden ]
+                                { src = "/icons/user.svg", description = "" }
                             )
                         ]
                     ]
@@ -164,7 +214,7 @@ viewHeader device =
                     (el [ width fill, height (px 1), Background.color (rgba 0 0 0 0.1) ] Element.none)
 
                 -- Categories
-                , row [ centerX, spacing 44, satoshi, Font.size 16, Font.color (rgb255 114 110 141), paddings 20 0 20 0 ]
+                , row [ centerX, spacing 44, satoshi, Font.size 16, Font.color (rgb255 114 110 141), paddings 20 0 20 0, role "navigation", ariaLabel "Categories" ]
                     categories
                 ]
 
@@ -306,7 +356,7 @@ viewHero device =
                     [ viewHeroContent device
                     , viewHeroButton device
                     ]
-                , image [ width fill ] { description = "hero image", src = "/images/hero.jpeg" }
+                , image [ width fill, ariaHidden ] { description = "hero image", src = "/images/hero.jpeg" }
                 ]
 
         _ ->
@@ -315,7 +365,7 @@ viewHero device =
 
 valueProposition :
     Device
-    -> { icon : String, iconDesc : String, title : String, description : String }
+    -> { icon : String, title : String, description : String }
     -> Element msg
 valueProposition device cardConfig =
     let
@@ -332,8 +382,8 @@ valueProposition device cardConfig =
     in
     el [ Background.color lightGrey, cardWidth, cardPaddings ]
         (column [ spacing 12 ]
-            [ image [ width (px 24), height (px 24) ]
-                { src = cardConfig.icon, description = cardConfig.iconDesc }
+            [ image [ width (px 24), height (px 24), ariaHidden ]
+                { src = cardConfig.icon, description = "" }
             , paragraph
                 [ headlineFour, Font.color darkPrimary, clashDisplay ]
                 [ text cardConfig.title ]
@@ -397,16 +447,16 @@ valuePropositions device =
         , layoutContainer layoutContainerStyles
             [ valueProposition
                 device
-                { icon = "icons/delivery.svg", iconDesc = "deliver icon", title = "Next day as standard", description = "Order before 3pm and get your order the next day" }
+                { icon = "icons/delivery.svg", title = "Next day as standard", description = "Order before 3pm and get your order the next day" }
             , valueProposition
                 device
-                { icon = "icons/checkmark.svg", iconDesc = "checkmark icon", title = "High quality stuff", description = "We only sell sorted high-quality pre-loved products" }
+                { icon = "icons/checkmark.svg", title = "High quality stuff", description = "We only sell sorted high-quality pre-loved products" }
             , valueProposition
                 device
-                { icon = "icons/purchase.svg", iconDesc = "purchase icon", title = "Unbeatable prices", description = "You won't find better prices anywhere" }
+                { icon = "icons/purchase.svg", title = "Unbeatable prices", description = "You won't find better prices anywhere" }
             , valueProposition
                 device
-                { icon = "icons/sprout.svg", iconDesc = "sprout icon", title = "Recycled packaging", description = "We use 100% recycled packaging" }
+                { icon = "icons/sprout.svg", title = "Recycled packaging", description = "We use 100% recycled packaging" }
             ]
         ]
 
@@ -424,8 +474,9 @@ view device model =
             , centerX
             , height fill
             , inFront (viewMobileMenu device model)
+            , role "main"
             ]
-            [ viewHeader device
+            [ viewHeader device model
             , viewHero device
             , valuePropositions device
             ]
